@@ -83,14 +83,16 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
 
-    plotElement.addEventListener('mousedown', function(event) {
+    function handleStart(event) {
         const initialA = a;
-        const initialMouseX = event.clientX;
-        const initialMouseY = event.clientY;
+        const initialMouseX = event.clientX || event.touches[0].clientX;
+        const initialMouseY = event.clientY || event.touches[0].clientY;
 
-        function onMouseMove(event) {
-            const deltaX = event.clientX - initialMouseX;
-            const deltaY = event.clientY - initialMouseY;
+        function onMove(event) {
+            const clientX = event.clientX || event.touches[0].clientX;
+            const clientY = event.clientY || event.touches[0].clientY;
+            const deltaX = clientX - initialMouseX;
+            const deltaY = clientY - initialMouseY;
             a = Math.min(30, Math.max(0, initialA + deltaX / 10 - deltaY / 10));
             audioElement.volume = a / 30;
             plotGraph();
@@ -101,14 +103,21 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         }
 
-        function onMouseUp() {
-            document.removeEventListener('mousemove', onMouseMove);
-            document.removeEventListener('mouseup', onMouseUp);
+        function onEnd() {
+            document.removeEventListener('mousemove', onMove);
+            document.removeEventListener('mouseup', onEnd);
+            document.removeEventListener('touchmove', onMove);
+            document.removeEventListener('touchend', onEnd);
         }
 
-        document.addEventListener('mousemove', onMouseMove);
-        document.addEventListener('mouseup', onMouseUp);
-    });
+        document.addEventListener('mousemove', onMove);
+        document.addEventListener('mouseup', onEnd);
+        document.addEventListener('touchmove', onMove);
+        document.addEventListener('touchend', onEnd);
+    }
+
+    plotElement.addEventListener('mousedown', handleStart);
+    plotElement.addEventListener('touchstart', handleStart);
 
     // Ensure the audio is not muted initially and set volume
     audioElement.muted = false;
