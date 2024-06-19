@@ -4,73 +4,65 @@ document.addEventListener('DOMContentLoaded', function() {
     const playPauseBtn = document.getElementById('playPauseBtn');
     const loopBtn = document.getElementById('loopBtn');
     const fileInput = document.getElementById('fileInput');
+    const descriptionElement = document.getElementById('description');
+    const navbar = document.querySelector('.navbar');
+    const graphSubmenu = document.getElementById('graphSubmenu');
+    const logoLink = document.querySelector('.logo a');
     let selectedGraph = 'heart';
     let isMuted = false;
     let isPlaying = false;
-    let isLooping = true; // LOOOOP ENABLED
+    let isLooping = true;
     let a = 10;
     let musicFiles = [];
     let loopInterval;
-    const loopSpeed = 100; //Speed in ms
+    const loopSpeed = 100;
 
-    const graphs = {
+    const graphConfigs = {
         heart: {
-            generateData: function(angleModifier = 0) {
-                const xValues = [];
-                const yValuesPositive = [];
-                for (let x = -2; x <= 2; x += 0.01) {
-                    xValues.push(x);
-                    yValuesPositive.push(calculateY(x, true, angleModifier));
-                }
-                return { x: xValues, yPositive: yValuesPositive };
-            },
-            plotGraph: function(angleModifier = 0) {
-                const data = this.generateData(angleModifier);
-                Plotly.newPlot(plotElement, [
-                    {
-                        x: data.x,
-                        y: data.yPositive,
-                        type: 'scatter',
-                        mode: 'lines',
-                        line: { color: isMuted ? 'grey' : 'rgba(255, 99, 71, 0.6)', width: isMuted ? 1 : Math.max(1, 5 - (a / 6)) },
-                        hoverinfo: 'skip' // Disable hover information for the graph, so the plotly is disabled pretty much
-                    }
-                ], {
-                    xaxis: { range: [-2.3, 2.3], visible: false, scaleanchor: 'y', scaleratio: 1 },
-                    yaxis: { range: [-1.5, 2.5], visible: false },
-                    plot_bgcolor: 'transparent',
-                    paper_bgcolor: 'transparent',
-                    showlegend: false,
-                    margin: { l: 0, r: 0, t: 0, b: 0 },
-                    hovermode: false // Disable hover mode here
-                }, { displayModeBar: false }); // Disabled Plotly mode bar
-            },
-            sampleMusic: 'audio/heart.mp3' // Default sample music for the heart graph (just do i wanna know by arctic monkeys  )
+            script: 'graphs/heart.js',
+            description: 'graphs/description-heart.txt',
+            thumbnail: 'assets/thumbnails/heart.png',
+            sampleMusic: 'audio/heart.mp3'
+        },
+        graph2: {
+            script: 'graphs/graph2.js',
+            description: 'graphs/description-graph2.txt',
+            thumbnail: 'assets/thumbnails/graph2.png',
+            sampleMusic: 'audio/sample.mp3'
         }
-        /*more to add in future, will make it more modular*/
     };
 
-    function calculateY(x, isPositive, angleModifier = 0) {
-        const e = Math.E;
-        const π = Math.PI;
-        const angle = (isPositive ? π : -π) * x + angleModifier;
-        const y = Math.pow(Math.abs(x), 2/3) + (e/3) * Math.sqrt(π - Math.pow(x, 2)) * Math.sin(a * angle);
-        return x === 0 ? 0 : y; 
+    function loadGraphScript(scriptUrl, callback) {
+        const script = document.createElement('script');
+        script.src = scriptUrl;
+        script.onload = callback;
+        document.head.appendChild(script);
+    }
+
+    function loadGraphDescription(descriptionUrl) {
+        fetch(descriptionUrl)
+            .then(response => response.text())
+            .then(text => {
+                descriptionElement.innerText = text;
+            });
     }
 
     function plotCurrentGraph(angleModifier = 0) {
-        graphs[selectedGraph].plotGraph(angleModifier);
+        loadGraphScript(graphConfigs[selectedGraph].script, function() {
+            plotGraph(angleModifier, plotElement, isMuted, a);
+        });
+        loadGraphDescription(graphConfigs[selectedGraph].description);
     }
 
     function selectGraph(graph) {
         selectedGraph = graph;
         plotCurrentGraph();
         playSampleMusic();
-        closeMenu(); 
+        closeSubmenus();
     }
 
     function playSampleMusic() {
-        const graph = graphs[selectedGraph];
+        const graph = graphConfigs[selectedGraph];
         if (graph.sampleMusic) {
             audioElement.src = graph.sampleMusic;
             audioElement.play();
@@ -104,7 +96,7 @@ document.addEventListener('DOMContentLoaded', function() {
     function uploadMusic(event) {
         musicFiles = Array.from(event.target.files);
         if (musicFiles.length > 0) {
-            playMusic(0); 
+            playMusic(0);
         }
     }
 
@@ -128,7 +120,7 @@ document.addEventListener('DOMContentLoaded', function() {
         let angle = 0;
         clearInterval(loopInterval);
         loopInterval = setInterval(() => {
-            angle += Math.PI / 100; // Looping adjusts here
+            angle += Math.PI / 100;
             if (angle > Math.PI) angle = -Math.PI;
             plotCurrentGraph(angle);
         }, loopSpeed);
@@ -148,6 +140,13 @@ document.addEventListener('DOMContentLoaded', function() {
             loopBtn.classList.remove('active');
             stopLoop();
         }
+    }
+
+    function closeSubmenus() {
+        const submenus = document.querySelectorAll('.submenu');
+        submenus.forEach(submenu => {
+            submenu.style.display = 'none';
+        });
     }
 
     plotElement.addEventListener('click', toggleMute);
@@ -207,38 +206,70 @@ document.addEventListener('DOMContentLoaded', function() {
     audioElement.muted = false;
     audioElement.volume = a / 30;
 
+    for (const [graphName, config] of Object.entries(graphConfigs)) {
+        const thumbnailDiv = document.createElement('div');
+        thumbnailDiv.className = 'thumbnail';
+        thumbnailDiv.onclick = () => selectGraph(graphName);
+
+        const img = document.createElement('img');
+        img.src = config.thumbnail;
+        img.alt = `${graphName} Graph`;
+
+        const label = document.createElement('div');
+        label.className = 'thumbnail-label';
+        label.textContent = graphName.charAt(0).toUpperCase() + graphName.slice(1);
+
+        thumbnailDiv.appendChild(img);
+        thumbnailDiv.appendChild(label);
+        graphSubmenu.appendChild(thumbnailDiv);
+    }
+
+    fileInput.addEventListener('change', uploadMusic);
+
     plotCurrentGraph();
     playSampleMusic();
+
+    // Navbar click functionality
+    logoLink.addEventListener('click', function() {
+        if (navbar.classList.contains('active')) {
+            navbar.classList.remove('active');
+            closeSubmenus();
+        } else {
+            navbar.classList.add('active');
+        }
+    });
+
+    document.addEventListener('click', function(event) {
+        const isClickInside = navbar.contains(event.target) || logoLink.contains(event.target);
+        if (!isClickInside) {
+            navbar.classList.remove('active');
+            closeSubmenus();
+        }
+    });
+
+    document.querySelectorAll('.nav-link').forEach(item => {
+        item.addEventListener('click', function() {
+            navbar.classList.add('active');
+        });
+    });
 });
 
-function toggleMenu() {
-    const sideMenu = document.getElementById('sideMenu');
-    const mainContent = document.getElementById('mainContent');
-    const sideMenuContent = document.querySelector('.side-menu-content');
-    if (sideMenu.style.width === '250px') {
-        sideMenu.style.width = '0';
-        mainContent.style.marginLeft = '0';
-        sideMenuContent.style.opacity = '0'; // Use opacity for smooth transition
-        setTimeout(() => {
-            sideMenuContent.style.visibility = 'hidden';
-        }, 500); 
-    } else {
-        sideMenu.style.width = '250px';
-        mainContent.style.marginLeft = '250px';
-        sideMenuContent.style.visibility = 'visible';
-        sideMenuContent.style.opacity = '1'; 
-    }
+function toggleSubmenu(id) {
+    const submenu = document.getElementById(id);
+    submenu.style.display = submenu.style.display === 'none' ? 'flex' : 'none';
 }
 
-function closeMenu(event) {
-    const sideMenu = document.getElementById('sideMenu');
-    const sideMenuContent = document.querySelector('.side-menu-content');
-    if (sideMenu.style.width === '250px' && !sideMenu.contains(event.target) && event.target.id !== 'menuButton') {
-        toggleMenu();
-    }
+function closeSubmenus() {
+    const submenus = document.querySelectorAll('.submenu');
+    submenus.forEach(submenu => {
+        submenu.style.display = 'none';
+    });
 }
 
-function toggleDropdown(id) {
-    const dropdownContent = document.getElementById(id);
-    dropdownContent.style.display = dropdownContent.style.display === 'flex' ? 'none' : 'flex';
+function connectToSpotify() {
+    alert("Connect to Spotify feature coming soon!");
+}
+
+function selectYouTubePlaylist() {
+    alert("Select YouTube Playlist feature coming soon!");
 }

@@ -1,0 +1,2 @@
+This is the second graph.
+It uses the equation g(x) = sqrt[3](x^2) + (π/4) cos(πx) + (1/5) e^(-x^2).

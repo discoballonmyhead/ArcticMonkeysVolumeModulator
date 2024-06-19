@@ -1,0 +1,2 @@
+This is the heart graph.
+It represents a heart shape using a mathematical equation.
