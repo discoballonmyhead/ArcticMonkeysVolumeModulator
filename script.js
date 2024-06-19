@@ -57,15 +57,14 @@ document.addEventListener('DOMContentLoaded', function() {
     function selectGraph(graph) {
         selectedGraph = graph;
         plotCurrentGraph();
-        playSampleMusic();
+        setSampleMusic();
         closeSubmenus();
     }
 
-    function playSampleMusic() {
+    function setSampleMusic() {
         const graph = graphConfigs[selectedGraph];
         if (graph.sampleMusic) {
             audioElement.src = graph.sampleMusic;
-            audioElement.play();
         }
     }
 
@@ -96,17 +95,16 @@ document.addEventListener('DOMContentLoaded', function() {
     function uploadMusic(event) {
         musicFiles = Array.from(event.target.files);
         if (musicFiles.length > 0) {
-            playMusic(0);
+            setMusicSource(0);
         }
     }
 
-    function playMusic(index) {
+    function setMusicSource(index) {
         if (index >= 0 && index < musicFiles.length) {
             const file = musicFiles[index];
             const reader = new FileReader();
             reader.onload = function(e) {
                 audioElement.src = e.target.result;
-                audioElement.play();
             };
             reader.readAsDataURL(file);
         }
@@ -227,7 +225,7 @@ document.addEventListener('DOMContentLoaded', function() {
     fileInput.addEventListener('change', uploadMusic);
 
     plotCurrentGraph();
-    playSampleMusic();
+    setSampleMusic();
 
     // Navbar click functionality
     logoLink.addEventListener('click', function() {

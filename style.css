@@ -166,7 +166,7 @@ main {
     background: #1e1e24;
 }
 
-.submenu::-webkit-scrollbar-thumb {
+subnav::-webkit-scrollbar-thumb {
     background: #6649b8;
 }
 
@@ -195,6 +195,7 @@ main {
     max-height: 300px; /* Set a max height for the submenu */
     overflow-y: auto; /* Make the submenu scrollable */
 }
+
 /* Small screens */
 @media only screen and (max-width: 600px) {
     .navbar {
