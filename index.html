@@ -8,9 +8,37 @@
     <script src="libs/plotly.min.js"></script>
 </head>
 <body>
-    <div id="plot"></div>
-    <audio id="audio" src="audio/sample.mp3" preload="auto"></audio>
-    <button id="playPauseBtn">Play/Pause</button>
+    <div id="menuButton" onclick="toggleMenu()">☰</div>
+    <div id="sideMenu" class="side-menu">
+        <div class="side-menu-content">
+            <h2>Menu</h2>
+            <div class="menu-item dropdown" onclick="toggleDropdown('graphDropdown')">
+                <button class="dropdown-btn">Select Graph</button>
+                <div id="graphDropdown" class="dropdown-content">
+                    <div class="thumbnail" onclick="selectGraph('heart')">
+                        <img src="assets/thumbnails/heart.png" alt="Heart Graph">
+                        <div class="thumbnail-label">Heart</div>
+                    </div>
+                    <!--will add more graphs soon , with more modularity-->
+                </div>
+            </div>
+            <div class="menu-item dropdown" onclick="toggleDropdown('uploadDropdown')">
+                <button class="dropdown-btn">Upload Music</button>
+                <div id="uploadDropdown" class="dropdown-content">
+                    <input type="file" id="fileInput" accept="audio/mp3" multiple>
+                </div>
+            </div>
+            <div class="menu-item" onclick="connectToSpotify()">Connect to Spotify</div>
+        </div>
+    </div>
+    <div id="mainContent" onclick="closeMenu(event)">
+        <div id="plot"></div>
+        <audio id="audio" preload="auto"></audio>
+        <div class="controls">
+            <button id="playPauseBtn">Play</button>
+            <button id="loopBtn">Loop</button>
+        </div>
+    </div>
     <script src="script.js"></script>
 </body>
 </html>

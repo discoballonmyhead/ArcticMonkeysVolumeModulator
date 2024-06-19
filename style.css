@@ -1,17 +1,32 @@
 body {
     display: flex;
-    flex-direction: column;
     justify-content: center;
     align-items: center;
     height: 100vh;
     margin: 0;
     background-color: #000;
+    color: #fff;
+    font-family: Arial, sans-serif;
+}
+
+#mainContent {
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    transition: margin-left 0.5s; 
 }
 
 #plot {
     width: 80vmin;
     height: 80vmin;
     position: relative;
+    cursor: default; /* Keep the cursor as default */
+}
+
+#plot * {
+    cursor: default; 
 }
 
 .mute-overlay {
@@ -20,17 +35,11 @@ body {
     left: 0;
     width: 100%;
     height: 100%;
-    background: rgba(128, 128, 128, 0.5);
+    background: transparent; 
     display: flex;
     justify-content: center;
     align-items: center;
-}
-
-.mute-line {
-    width: 2px;
-    height: 100%;
-    background-color: grey;
-    transform: rotate(45deg);
+    pointer-events: none; 
 }
 
 button {
@@ -40,4 +49,149 @@ button {
     color: white;
     border: none;
     cursor: pointer;
+    font-size: 1em;
+    border-radius: 5px;
+    transition: background-color 0.3s, transform 0.3s;
+}
+
+button:hover {
+    background-color: #555;
+    transform: scale(1.05);
+}
+
+#menuButton {
+    position: absolute;
+    top: 10px;
+    left: 10px;
+    font-size: 30px;
+    cursor: pointer;
+}
+
+.side-menu {
+    height: 100%;
+    width: 0;
+    position: fixed;
+    z-index: 1;
+    top: 0;
+    left: 0;
+    background-color: #111;
+    overflow-x: hidden;
+    transition: width 0.5s; 
+    padding-top: 60px;
+}
+
+.side-menu-content {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 250px;
+    height: 100%;
+    padding-top: 60px;
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    opacity: 0; 
+    transition: opacity 0.5s; 
+}
+
+.side-menu.open .side-menu-content {
+    opacity: 1; 
+}
+
+#thumbnailContainer {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin-top: 20px;
+}
+
+.thumbnail {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin: 10px 0;
+    cursor: pointer;
+    transition: transform 0.3s;
+}
+
+.thumbnail img {
+    width: 80px;
+    height: 80px;
+    object-fit: cover;
+    border-radius: 8px;
+}
+
+.thumbnail-label {
+    margin-top: 5px;
+    font-size: 14px;
+    color: white;
+}
+
+.thumbnail:hover {
+    transform: scale(1.1);
+}
+
+.dropdown {
+    margin-top: 20px;
+    width: 100%; 
+}
+
+.dropdown-btn {
+    background-color: #444;
+    color: white;
+    padding: 10px;
+    font-size: 16px;
+    border: none;
+    cursor: pointer;
+    width: 100%; 
+    text-align: left;
+    border-radius: 5px;
+}
+
+.dropdown-content {
+    display: none;
+    flex-direction: column;
+    align-items: center;
+    background-color: #111;
+    box-shadow: 0 8px 16px rgba(0,0,0,0.2);
+    z-index: 1;
+    width: 100%;
+    max-height: 200px; 
+    overflow-y: auto; 
+    transition: max-height 0.3s; /* Smooth transition */
+}
+
+input[type="file"] {
+    margin-top: 20px;
+    color: white;
+}
+
+.menu-item {
+    background-color: #444;
+    color: white;
+    padding: 10px;
+    font-size: 16px;
+    border: none;
+    cursor: pointer;
+    width: 100%;
+    text-align: left;
+    margin-top: 10px;
+    border-radius: 5px;
+    transition: background-color 0.3s, transform 0.3s;
+}
+
+.menu-item:hover {
+    background-color: #555;
+    transform: scale(1.05);
+}
+
+#loopBtn.active {
+    background-color: #e2caca; /* Active state color */
+}
+
+.controls {
+    display: flex;
+    gap: 10px;
+    margin-top: 20px;
 }
