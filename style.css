@@ -6,6 +6,9 @@
     --bg-primary: #23232e;
     --bg-secondary: #141418;
     --transition-speed: 600ms;
+    --grey-light: #ececec;
+    --grey-dark: #b6b6b6;
+    --grey-darker: #232323;
 }
 
 body {
@@ -90,6 +93,27 @@ main {
     margin: 0 1.5rem;
 }
 
+.nav-link .svg-inline--fa path {
+    transition: fill var(--transition-speed);
+}
+
+.nav-link .svg-inline--fa .st95 {
+    fill: var(--grey-dark); /* Darker grey for the triangle */
+}
+
+.nav-link .svg-inline--fa .st83 {
+    fill: var(--grey-darker); /* Lighter grey for the inner circle */
+}
+
+.nav-link:hover .svg-inline--fa .st95 {
+    fill: #FF0000; /* Red color when hovered */
+}
+
+.nav-link:hover .svg-inline--fa .st83 {
+    fill: #FFFFFF; /* White color when hovered */
+}
+
+
 .fa-primary {
     color: #ff7eee;
 }
@@ -166,7 +190,7 @@ main {
     background: #1e1e24;
 }
 
-subnav::-webkit-scrollbar-thumb {
+.subnav::-webkit-scrollbar-thumb {
     background: #6649b8;
 }
 
@@ -322,4 +346,14 @@ button:hover {
     margin-top: 20px;
     color: white;
     font-size: 1em;
+}
+
+#version {
+    position: absolute;
+    bottom: 10px;
+    right: 10px;
+    color: rgb(102, 102, 102);
+    font-size: 0.8em;
+    opacity: 0.8;
+    z-index: 1;
 }
