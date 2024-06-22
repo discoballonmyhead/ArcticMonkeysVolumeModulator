@@ -1,13 +1,14 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Volume Modulator</title>
-    <link rel="stylesheet" href="style.css">
-    <script defer src="theme.js"></script>
-    <script src="libs/plotly.min.js"></script>
-</head>
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Volume Modulator</title>
+        <link rel="stylesheet" href="style.css">
+        <script defer src="theme.js"></script>
+        <script src="libs/plotly.min.js"></script>
+        <script src="https://www.youtube.com/iframe_api"></script>
+    </head>
 <body>
     <nav class="navbar">
         <ul class="navbar-nav">
@@ -112,7 +113,7 @@
                 </a>
             </li>
             <li class="nav-item">
-                <a href="#" class="nav-link" onclick="selectYouTubePlaylist()">
+                <a href="#" class="nav-link" onclick="toggleSubmenu('youtubeSubmenu')">
                     <svg aria-hidden="true" focusable="false" width="80px" height="80px" viewBox="2.5 0 95 95" xmlns="http://www.w3.org/2000/svg" class="svg-inline--fa fa-youtube fa-w-16 fa-5x">
                         <style type="text/css">
                             .st0{fill:#FFFFFF;}
@@ -280,8 +281,11 @@
                             </g>
                         </g>
                     </svg>
-                    <span class="link-text">YouTube Playlist</span>
+                    <span class="link-text">Play YouTube Playlist</span>
                 </a>
+                <div id="youtubeSubmenu" class="submenu">
+                    <input type="text" id="youtubeLinkInput" placeholder = "Enter YouTube Music/Video/Playlist Link">
+                    <button onclick ="addYoutubeLink()">Add Link</button>
             </li>
             <li class="nav-item" id="themeButton">
                 <a href="#" class="nav-link">
@@ -294,15 +298,39 @@
         </ul>
     </nav>
     <main id="mainContent">
-        <div id="plot"></div>
-        <audio id="audio" preload="auto"></audio>
-        <div class="controls">
-            <button id="playPauseBtn">Play</button>
-            <button id="loopBtn">Loop</button>
+        <div id="plotArea" class="flex-container">
+            <div id="plotContainer" class="flex-item plot">
+                <div id="controlOverlay" class="flex-container">
+                    <div class="controls">
+                        <button id="loopBtn">Loop</button>
+                    </div>
+                </div>
+                <div id="plot"></div>
+                <div id="controlOverlay" class="flex-container">
+                    <div class="controls">
+                        <button id="playPauseBtn">Play</button>
+                    </div>
+                </div>
+            </div>
         </div>
-        <div id="description"></div>
-        <div id="version">Version: 0.8.1</div>
+        <div id="graphDescriptionContainer" class="flex-item description">
+            <div id="graphDescription"></div>
+        </div>
+        <div id="pageDescription" class="flex-item description">
+            <h2>About This Website</h2>
+            <p>This website is a volume modulator...</p>
+            <a href="https://github.com/username/repo">GitHub Repository</a>
+            <a href="license.md">License</a>
+        </div>
+        <div id="companyInfo" class="flex-item description">
+            <p>Company Information and Logo Animation</p>
+            <div id="logoAnimation"></div>
+            <div id="version">Version: 0.8.1</div>
+        </div>
+        <audio id="audio" preload="auto"></audio>
+        <div id="player" style="display: none;"></div>
     </main>
+
     <script src="script.js"></script>
 </body>
 </html>

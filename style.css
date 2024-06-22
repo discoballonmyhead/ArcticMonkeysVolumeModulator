@@ -12,10 +12,11 @@
 }
 
 body {
-    color: black;
-    background-color: rgb(0, 0, 0);
+    color: var(--text-primary);
+    background-color: var(--bg-secondary);
     margin: 0;
     padding: 0;
+    overflow-x: hidden;
 }
 
 body::-webkit-scrollbar {
@@ -35,16 +36,15 @@ main {
     padding: 1rem;
     display: flex;
     flex-direction: column;
-    justify-content: center;
+    justify-content: flex-start;
     align-items: center;
     min-height: 100vh;
-    transition: margin-left 600ms;
+    position: relative;
 }
 
 .navbar {
     position: fixed;
     background-color: var(--bg-primary);
-    transition: width 700ms ease;
     overflow: hidden;
 }
 
@@ -97,23 +97,6 @@ main {
     transition: fill var(--transition-speed);
 }
 
-.nav-link .svg-inline--fa .st95 {
-    fill: var(--grey-dark); /* Darker grey for the triangle */
-}
-
-.nav-link .svg-inline--fa .st83 {
-    fill: var(--grey-darker); /* Lighter grey for the inner circle */
-}
-
-.nav-link:hover .svg-inline--fa .st95 {
-    fill: #FF0000; /* Red color when hovered */
-}
-
-.nav-link:hover .svg-inline--fa .st83 {
-    fill: #FFFFFF; /* White color when hovered */
-}
-
-
 .fa-primary {
     color: #ff7eee;
 }
@@ -140,7 +123,7 @@ main {
     display: flex;
     justify-content: center;
     align-items: center;
-    transition: var (--transition-speed);
+    transition: var(--transition-speed);
 }
 
 .logo svg {
@@ -155,7 +138,6 @@ main {
     transition: var(--transition-speed);
 }
 
-/* Active class for expanded navbar */
 .navbar.active {
     width: 16rem;
 }
@@ -179,7 +161,7 @@ main {
     padding: 10px;
     background-color: var(--bg-secondary);
     overflow-y: auto;
-    max-height: 200px; /* Adjust based on your design */
+    max-height: 200px;
 }
 
 .submenu::-webkit-scrollbar {
@@ -190,7 +172,7 @@ main {
     background: #1e1e24;
 }
 
-.subnav::-webkit-scrollbar-thumb {
+.submenu::-webkit-scrollbar-thumb {
     background: #6649b8;
 }
 
@@ -206,7 +188,7 @@ main {
 }
 
 .thumbnail img {
-    width: 50px; /* Adjust the size of the thumbnails */
+    width: 50px;
     height: 50px;
 }
 
@@ -216,11 +198,10 @@ main {
 }
 
 #graphSubmenu {
-    max-height: 300px; /* Set a max height for the submenu */
-    overflow-y: auto; /* Make the submenu scrollable */
+    max-height: 300px;
+    overflow-y: auto;
 }
 
-/* Small screens */
 @media only screen and (max-width: 600px) {
     .navbar {
         bottom: 0;
@@ -245,7 +226,6 @@ main {
     }
 }
 
-/* Large screens */
 @media only screen and (min-width: 600px) {
     .navbar {
         top: 0;
@@ -295,38 +275,45 @@ main {
     display: block;
 }
 
-.controls {
+.flex-container {
     display: flex;
-    gap: 10px;
-    margin-top: 20px;
+    justify-content: center;
+    align-items: center;
+    margin-top: 10px;
+    width: 100%;
 }
 
-#plot {
-    width: 80vmin;
-    height: 80vmin;
+.flex-item {
+    margin: 10px;
+    padding: 10px;
+    background-color: var(--bg-secondary);
+    border-radius: 5px;
+    width: 90%;
+    max-width: 800px;
+}
+
+.plot {
+    display: flex;
+    justify-content: center;
+    align-items: center;
     position: relative;
-    cursor: default; /* Keep the cursor as default */
+    width: 100%;
+    height: 60vmin;
 }
 
 #plot * {
     cursor: default;
 }
 
-.mute-overlay {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: transparent;
+.controls {
     display: flex;
-    justify-content: center;
-    align-items: center;
-    pointer-events: none;
+    flex-direction: column;
+    gap: 10px;
+    pointer-events: auto;
+    transition: transform 0.6s;
 }
 
 button {
-    margin-top: 10px;
     padding: 10px;
     background-color: #444;
     color: white;
@@ -342,10 +329,10 @@ button:hover {
     transform: scale(1.05);
 }
 
-#description {
-    margin-top: 20px;
+#pageDescription {
     color: white;
     font-size: 1em;
+    text-align: center;
 }
 
 #version {
@@ -356,4 +343,42 @@ button:hover {
     font-size: 0.8em;
     opacity: 0.8;
     z-index: 1;
+}
+
+#player {
+    display: none;
+}
+
+#controlOverlay {
+    position: flex;
+    top: 60vmin;
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    pointer-events: none;
+}
+
+#graphDescriptionContainer {
+    color: white;
+    text-align: center;
+}
+
+#companyInfo {
+    color: white;
+    font-size: 1em;
+    text-align: center;
+}
+
+#logoAnimation {
+    margin-top: 10px;
+    height: 100px;
+    width: 100px;
+    background-color: #444;
+    border-radius: 50%;
+    animation: spin 4s linear infinite;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
 }

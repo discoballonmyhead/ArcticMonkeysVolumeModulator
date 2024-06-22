@@ -4,7 +4,9 @@ document.addEventListener('DOMContentLoaded', function() {
     const playPauseBtn = document.getElementById('playPauseBtn');
     const loopBtn = document.getElementById('loopBtn');
     const fileInput = document.getElementById('fileInput');
-    const descriptionElement = document.getElementById('description');
+    const graphDescriptionContainer = document.getElementById('graphDescriptionContainer');
+    const graphDescriptionElement = document.getElementById('graphDescription');
+    const pageDescription = document.getElementById('pageDescription');
     const navbar = document.querySelector('.navbar');
     const graphSubmenu = document.getElementById('graphSubmenu');
     const logoLink = document.querySelector('.logo a');
@@ -17,6 +19,12 @@ document.addEventListener('DOMContentLoaded', function() {
     let loopInterval;
     const loopSpeed = 100;
 
+    /* YouTube shenanigans */
+    let player;
+    let youtubeLinks = [];
+    let currentVideoIndex = 0;
+
+    /* Graph shenanigans */
     const graphConfigs = {
         heart: {
             script: 'graphs/heart.js',
@@ -43,7 +51,7 @@ document.addEventListener('DOMContentLoaded', function() {
         fetch(descriptionUrl)
             .then(response => response.text())
             .then(text => {
-                descriptionElement.innerText = text;
+                graphDescriptionElement.innerText = text;
             });
     }
 
@@ -227,7 +235,6 @@ document.addEventListener('DOMContentLoaded', function() {
     plotCurrentGraph();
     setSampleMusic();
 
-    // Navbar click functionality
     logoLink.addEventListener('click', function() {
         if (navbar.classList.contains('active')) {
             navbar.classList.remove('active');
@@ -250,6 +257,20 @@ document.addEventListener('DOMContentLoaded', function() {
             navbar.classList.add('active');
         });
     });
+
+    window.addEventListener('resize', function() {
+        const plotContainerRect = document.getElementById('plotContainer').getBoundingClientRect();
+        const controlOverlay = document.getElementById('controlOverlay');
+        controlOverlay.style.top = `${plotContainerRect.bottom}px`;
+    });
+
+    window.dispatchEvent(new Event('resize'));
+
+    document.getElementById('youtubeLinkInput').addEventListener('keypress', function(event) {
+        if (event.key === 'Enter') {
+            addYouTubeLink();
+        }
+    });
 });
 
 function toggleSubmenu(id) {
@@ -268,6 +289,96 @@ function connectToSpotify() {
     alert("Connect to Spotify feature coming soon!");
 }
 
-function selectYouTubePlaylist() {
-    alert("Select YouTube Playlist feature coming soon!");
+// YouTube API code
+function onYouTubeIframeAPIReady() {
+    console.log('YouTube IFrame API is ready');
+}
+
+function addYouTubeLink() {
+    const linkInput = document.getElementById('youtubeLinkInput').value;
+    const videoId = parseYouTubeLink(linkInput);
+    if (videoId) {
+        youtubeLinks.push(videoId);
+        if (!player) {
+            loadYouTubePlayer(videoId);
+        }
+    } else {
+        alert('Invalid YouTube link');
+    }
+}
+
+function parseYouTubeLink(link) {
+    const regex = /(?:https?:\/\/)?(?:www\.)?(?:youtube\.com\/(?:[^\/\n\s]+\/\S+\/|(?:v|e(?:mbed)?)\/|\S*?[?&]v=)|youtu\.be\/)([a-zA-Z0-9_-]{11})/;
+    const match = link.match(regex);
+    return match ? match[1] : null;
+}
+
+function loadYouTubePlayer(videoId) {
+    player = new YT.Player('player', {
+        height: '360',
+        width: '640',
+        videoId: videoId,
+        playerVars: {
+            'autoplay': 1,
+            'controls': 0
+        },
+        events: {
+            'onReady': onPlayerReady,
+            'onStateChange': onPlayerStateChange
+        }
+    });
+}
+
+function onPlayerReady(event) {
+    event.target.setVolume(a * 3.33);
+    event.target.playVideo();
+}
+
+function onPlayerStateChange(event) {
+    if (event.data === YT.PlayerState.ENDED) {
+        currentVideoIndex = (currentVideoIndex + 1) % youtubeLinks.length;
+        player.loadVideoById(youtubeLinks[currentVideoIndex]);
+    }
+}
+
+function addToPlaylist(videoId) {
+    fetch(`https://www.googleapis.com/youtube/v3/videos?part=snippet&id=${videoId}&key=YOUR_API_KEY`)
+        .then(response => response.json())
+        .then(data => {
+            const videoData = data.items[0];
+            const thumbnail = videoData.snippet.thumbnails.default.url;
+            const title = videoData.snippet.title;
+            const playlistItem = document.createElement('div');
+            playlistItem.className = 'playlist-item';
+            playlistItem.innerHTML = `
+                <img src="${thumbnail}" alt="${title}" class="playlist-thumbnail">
+                <div class="playlist-info">
+                    <div class="playlist-title">${title}</div>
+                    <div class="playlist-status" id="status-${videoId}">Paused</div>
+                </div>
+                <div class="playlist-controls">
+                    <button onclick="playVideo('${videoId}')">Play</button>
+                    <button onclick="removeFromPlaylist('${videoId}')">Remove</button>
+                </div>
+            `;
+            playlistElement.appendChild(playlistItem);
+        });
+}
+
+window.playVideo = function(videoId) {
+    player.loadVideoById(videoId);
+    updatePlaylistStatus(videoId, 'Playing');
+};
+
+window.removeFromPlaylist = function(videoId) {
+    youtubeLinks = youtubeLinks.filter(id => id !== videoId);
+    document.getElementById(`item-${videoId}`).remove();
+};
+
+function updatePlaylistStatus(videoId, status) {
+    const statusElement = document.getElementById(`status-${videoId}`);
+    if (statusElement) {
+        statusElement.textContent = status;
+        statusElement.style.color = status === 'Playing' ? 'green' : 'yellow';
+    }
 }

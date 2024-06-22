@@ -22,7 +22,7 @@ function plotGraph(angleModifier, plotElement, isMuted, a) {
             type: 'scatter',
             mode: 'lines',
             line: { color: isMuted ? 'grey' : 'rgba(255, 99, 71, 0.6)', width: isMuted ? 1 : Math.max(1, 5 - (a / 6)) },
-            hoverinfo: 'skip' // Disable hover information for the graph, so the plotly is disabled pretty much
+            hoverinfo: 'skip'
         }
     ], {
         xaxis: { range: [-2.3, 2.3], visible: false, scaleanchor: 'y', scaleratio: 1 },
@@ -31,6 +31,6 @@ function plotGraph(angleModifier, plotElement, isMuted, a) {
         paper_bgcolor: 'transparent',
         showlegend: false,
         margin: { l: 0, r: 0, t: 0, b: 0 },
-        hovermode: false // Disable hover mode here
-    }, { displayModeBar: false }); // Disabled Plotly mode bar
+        hovermode: false
+    }, { displayModeBar: false });
 }
