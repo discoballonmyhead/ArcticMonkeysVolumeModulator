@@ -17,8 +17,8 @@
     --alt-bg-color: #2a2a2a;
     --border-radius: 20px;
     --box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
-    --track-art-size: 40vw; /* Use percentage for responsiveness */
-    --track-art-max-size: 150px; /* Max size for larger screens */
+    --track-art-size: 20vw; /* Use percentage for responsiveness */
+    --track-art-max-size: 100px; /* Max size for larger screens */
     --track-art-radius: 50%;
     --track-height: 70px; /* Track height customization */
 }
@@ -37,6 +37,7 @@ body {
     margin: 0;
     padding: 0;
     overflow-x: hidden;
+    
 }
 
 /* Scrollbar Styling */
@@ -126,14 +127,11 @@ main {
 
 .fa-primary {
     color: #ff7eee;
+    transition: var(--transition-speed);
 }
 
 .fa-secondary {
     color: #df49a6;
-}
-
-.fa-primary,
-.fa-secondary {
     transition: var(--transition-speed);
 }
 
@@ -305,9 +303,25 @@ sub-menu::-webkit-scrollbar-thumb {
     display: block;
 }
 
+.dark .player-container, .dark .track, .dark .remove-track, .dark .seek-slider {
+    background-color: #333;
+    color: #fff;
+}
+
+.light .player-container, .light .track, .light .remove-track, .light .seek-slider {
+    background-color: #fdf6e3;
+    color: #576e75;
+}
+
+.solar .player-container, .solar .track, .solar .remove-track, .solar .seek-slider {
+    background-color: #fff;
+    color: #000;
+}
+
 /* Flexbox Container Styling */
 .flex-container {
     display: flex;
+    flex-direction:  horizontal;
     justify-content: center;
     align-items: center;
     margin-top: 10px;
@@ -321,6 +335,16 @@ sub-menu::-webkit-scrollbar-thumb {
     border-radius: 5px;
     width: 90%;
     max-width: 800px;
+}
+
+.flex-item.description {
+    width: 100%;
+    max-width: 800px;
+    margin: 10px auto;
+    padding: 20px;
+    background-color: var(--bg-secondary);
+    border-radius: var(--border-radius);
+
 }
 
 .plot {
@@ -379,6 +403,7 @@ button:hover {
 
 #player {
     display: none;
+    padding: 10px;
 }
 
 #controlOverlay {
@@ -417,20 +442,18 @@ button:hover {
 
 /* Music Player Specific Styling */
 #musicPlayerBox {
-    width: 100%;
     max-width: 300px;
-    max-height: 1200px;
+    margin: 0 auto; /* Centering the player */
     background-color: var(--control-bg);
     border-radius: var(--border-radius);
     overflow: hidden;
     box-shadow: var(--box-shadow);
     display: flex;
     flex-direction: column;
-    margin: 1px;
 }
 
 .player {
-    padding: 20px;
+    padding: 10px;
 }
 
 .details {
@@ -441,68 +464,92 @@ button:hover {
 }
 
 .track-art {
-    width: var(--track-art-size);
-    height: var(--track-art-size);
-    max-width: var(--track-art-max-size);
-    max-height: var(--track-art-max-size);
+    width: 50px; /* Smaller size */
+    height: 50px;
     background-color: #333;
     background-size: cover;
     background-position: center;
-    border-radius: var(--track-art-radius);
-    margin-bottom: 15px;
+    border-radius: 50%;
+    margin-bottom: 10px;
 }
 
 .track-info {
     flex: 1;
+    font-size: 0.8em; /* Reduced font size */
 }
 
 .track-name {
     font-size: 1.2em;
     color: var(--secondary-text);
-    margin-bottom: 5px;
+    margin: 5px 0;
 }
 
 .track-artist {
     font-size: 1em;
     color: var(--primary-text);
+    margin: 5px 0;
 }
 
 .player-controls {
-    margin-top: 15px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin-top: 10px; /* Reduced margin */
 }
 
 .music-buttons {
     display: flex;
-    justify-content: space-around;
-    align-items: center;
-    margin-bottom: 15px;
+    justify-content: space-between;
+    width: 100%;
+    margin-bottom: 10px; /* Reduced margin */
 }
 
 .music-buttons div {
     color: var (--primary-text);
     cursor: pointer;
-    font-size: 1.5em;
+    font-size: 1.2em;
+    transition: color var(--transition-speed);
+}
+
+.player-controls .music-buttons div:hover {
+    color: var(--hover-color);
+}
+
+.player-controls .music-buttons .active {
+    color: var(--active-color);
 }
 
 .slider-container {
+    width: 100%;
     display: flex;
     justify-content: center;
-    align-items: center;
-    margin-bottom: 10px;
+    margin-bottom: 10px; /* Reduced margin */
 }
 
 .seek-slider {
     width: 80%;
-    height: 5px;
+    height: 2px;
     background: var(--highlight-color);
     border-radius: 5px;
     cursor: pointer;
 }
 
+.seek-slider::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 12px; /* Smaller size */
+    height: 12px;
+    background: var(--highlight-color);
+    cursor: pointer;
+    border: none; /* Remove border */
+    border-radius: 50%;
+}
+
 .info {
     display: flex;
     justify-content: space-between;
-    font-size: 0.8em;
+    width: 100%;
+    font-size: 0.8em; /* Reduced font size */
     color: #fff;
 }
 
@@ -514,7 +561,7 @@ button:hover {
 }
 
 .playlist {
-    padding: 20px;
+    padding: 10px;
     flex: 1;
     overflow-y: auto;
 }
@@ -524,47 +571,51 @@ button:hover {
     overflow-y: auto;
 }
 
-.track-list .track {
+.track-list:hover {
+    overflow-y: auto;
+}
+
+.track {
     display: flex;
     align-items: center;
-    padding: 10px 0;
+    padding: 5px 0; /* Reduced padding */
     cursor: pointer;
-    height: var(--track-height);
     background-color: var(--control-bg);
 }
 
-.track-list .track:nth-child(even) {
+.track:nth-child(even) {
     background-color: var(--alt-bg-color);
 }
 
-.track-list .track.active {
+.track.active {
     background-color: var(--active-color);
 }
 
-.track-list .track:hover {
+.track:hover {
     background-color: var(--hover-color);
 }
 
-.track-list .track img {
-    width: 40px;
+.track img {
+    width: 40px; /* Smaller size */
     height: 40px;
-    margin-right: 15px;
+    border-radius: 5px; /* Reduced border radius */
+    margin-right: 10px;
 }
 
-.track-list .track .track-info {
+.track-info {
     flex: 1;
     display: flex;
     flex-direction: column;
     justify-content: center;
 }
 
-.track-list .track .track-name {
-    font-size: 0.9em;
+.track-name {
+    font-size: 0.8em;
     color: var(--primary-text);
     margin-bottom: 5px;
 }
 
-.track-list .track .track-artist {
+.track-artist {
     font-size: 0.8em;
     color: var(--secondary-text);
 }
@@ -581,6 +632,7 @@ button:hover {
 @media (max-width: 768px) {
     .player-container {
         max-width: 90vw;
+        max-height: 50px;
     }
 
     .track-art {
@@ -649,7 +701,7 @@ button:hover {
     font-size: 1em;
     border-radius: 5px;
     transition: background-color 0.3s, transform 0.3s;
-    z-index: 10; /* Ensure the button is on top */
+    z-index: 1; /*find the reason why this works*/
 }
 
 #effectBtn:hover {
@@ -659,4 +711,17 @@ button:hover {
 
 #effectBtn.active {
     background-color: #ff9f1a;
+}
+
+.remove-track {
+    background: none;
+    border: none;
+    color: var(--text-primary);
+    font-size: 1.2em;
+    cursor: pointer;
+    margin-left: auto;
+}
+
+.remove-track:hover {
+    color: var(--highlight-color);
 }

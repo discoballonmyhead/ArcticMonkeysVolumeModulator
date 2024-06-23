@@ -28,7 +28,10 @@ document.addEventListener('DOMContentLoaded', () => {
     const effectLoopSpeed = 100;
     let currentTrackIndex = 0;
     const defaultArtist = "Unknown Artist";
-    const defaultTrackArt = "path/to/default-art.png"; // Add your default track art path here
+    const defaultTrackArt = "assets/icons/default-song-icon.png"; // Add your default track art path here
+
+    audioElement.volume = a / 30;
+    volumePercentage.textContent = `${Math.round(audioElement.volume * 100)}%`; // Set initial volume percentage
 
     const musicQueue = [];
 
@@ -37,7 +40,7 @@ document.addEventListener('DOMContentLoaded', () => {
             script: 'graphs/heart.js',
             description: 'graphs/description-heart.txt',
             thumbnail: 'assets/thumbnails/heart.png',
-            sampleMusic: 'audio/heart.mp3'
+            sampleMusic: 'audio/Do I wanna know - Arctic Monkeys.mp3'
         },
         graph2: {
             script: 'graphs/graph2.js',
@@ -107,30 +110,56 @@ document.addEventListener('DOMContentLoaded', () => {
             plotElement.removeChild(overlay);
         }
     }
-
     function uploadMusic(event) {
         const files = Array.from(event.target.files);
         files.forEach(file => {
             const src = URL.createObjectURL(file);
-            const name = file.name.split('.').slice(0, -1).join('.');
-            addTrackToQueue(src, name, defaultArtist, defaultTrackArt);
+            extractMetadata(file).then(metadata => {
+                addTrackToQueue(src, metadata.name, metadata.artist, metadata.art);
+            }).catch(() => {
+                addTrackToQueue(src, file.name.split('.').slice(0, -1).join('.'), defaultArtist, defaultTrackArt);
+            });
         });
         if (files.length > 0 && !isPlaying) {
             loadTrack(0);
         }
     }
 
-    function addTrackToQueue(src, name, artist, art) {
+    function extractMetadata(file) {
+        return new Promise((resolve, reject) => {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const buffer = e.target.result;
+                const data = new Uint8Array(buffer);
+                const id3 = new ID3(data); // Use a library like jsmediatags
+                id3.read({
+                    onSuccess: tag => {
+                        const metadata = {
+                            name: tag.tags.title || file.name.split('.').slice(0, -1).join('.'),
+                            artist: tag.tags.artist || defaultArtist,
+                            art: tag.tags.picture ? URL.createObjectURL(new Blob([new Uint8Array(tag.tags.picture.data)])) : defaultTrackArt
+                        };
+                        resolve(metadata);
+                    },
+                    onError: error => reject(error)
+                });
+            };
+            reader.readAsArrayBuffer(file);
+        });
+    }
+
+    function addTrackToQueue(src, name, artist, art, origin) {
         const track = {
             src,
             name,
             artist,
-            art
+            art,
+            origin // new parameter
         };
         musicQueue.push(track);
         displayTrackList();
     }
-
+    
     function displayTrackList() {
         trackListElement.innerHTML = '';
         musicQueue.forEach((track, index) => {
@@ -140,24 +169,44 @@ document.addEventListener('DOMContentLoaded', () => {
                 trackDiv.classList.add('active');
             }
             trackDiv.onclick = () => loadTrack(index);
-
+    
             const trackInfo = document.createElement('div');
             trackInfo.className = 'track-info';
-            trackInfo.innerHTML = `
-                <div class="track-name">${track.name}</div>
+            trackInfo.innerHTML = 
+                `<div class="track-name">${track.name}</div>
                 <div class="track-artist">${track.artist}</div>
-            `;
-
+                <div class="track-origin">${track.origin}</div>`; // Display track origin
+    
             const trackArt = document.createElement('img');
             trackArt.src = track.art;
             trackArt.alt = track.name;
             trackArt.className = 'track-art';
-
+    
+            const removeButton = document.createElement('button');
+            removeButton.className = 'remove-track';
+            removeButton.innerHTML = '&times;';
+            removeButton.onclick = (e) => {
+                e.stopPropagation();
+                removeTrack(index);
+            };
+    
             trackDiv.appendChild(trackArt);
             trackDiv.appendChild(trackInfo);
+            trackDiv.appendChild(removeButton);
             trackListElement.appendChild(trackDiv);
         });
     }
+
+    function removeTrack(index) {
+        musicQueue.splice(index, 1);
+        if (currentTrackIndex >= index) {
+            currentTrackIndex--;
+        }
+        displayTrackList();
+        if (isPlaying && currentTrackIndex === index) {
+            loadTrack(currentTrackIndex);
+        }
+    } 
 
     function loadTrack(index) {
         if (index >= 0 && index < musicQueue.length) {
@@ -169,8 +218,9 @@ document.addEventListener('DOMContentLoaded', () => {
             document.querySelector('.track-art').style.backgroundImage = `url(${track.art})`;
             isPlaying = false;
             updatePlayPauseButton();
+            displayTrackList();
         }
-    }
+    }    
 
     function startEffectLoop() {
         let angle = 0;
@@ -198,6 +248,8 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
+    effectBtn.addEventListener('click', toggleEffectLoop);
+
     function playpauseTrack() {
         isPlaying = !isPlaying;
         if (isPlaying) {
@@ -206,10 +258,12 @@ document.addEventListener('DOMContentLoaded', () => {
                 startEffectLoop();
                 isEffectLooping = true;
             }
+            document.querySelector('.remove-track').style.color = 'red';
         } else {
             audioElement.pause();
             stopEffectLoop();
             isEffectLooping = false;
+            document.querySelector('.remove-track').style.color = 'grey';
         }
         updatePlayPauseButton();
     }
@@ -258,7 +312,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const initialA = a;
         const initialMouseX = event.clientX || event.touches[0].clientX;
         const initialMouseY = event.clientY || event.touches[0].clientY;
-
+    
         function onMove(event) {
             const clientX = event.clientX || event.touches[0].clientX;
             const clientY = event.clientY || event.touches[0].clientY;
@@ -266,6 +320,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const deltaY = clientY - initialMouseY;
             a = Math.min(30, Math.max(0, initialA + deltaX / 10 - deltaY / 10));
             audioElement.volume = a / 30;
+            volumePercentage.textContent = `${Math.round((a / 30) * 100)}%`; // Update volume percentage
             plotCurrentGraph();
             if (a === 0 && !isMuted) {
                 toggleMute();
@@ -273,14 +328,14 @@ document.addEventListener('DOMContentLoaded', () => {
                 toggleMute();
             }
         }
-
+    
         function onEnd() {
             document.removeEventListener('mousemove', onMove);
             document.removeEventListener('mouseup', onEnd);
             document.removeEventListener('touchmove', onMove);
             document.removeEventListener('touchend', onEnd);
         }
-
+    
         document.addEventListener('mousemove', onMove);
         document.addEventListener('mouseup', onEnd);
         document.addEventListener('touchmove', onMove);
@@ -291,6 +346,27 @@ document.addEventListener('DOMContentLoaded', () => {
     plotElement.addEventListener('touchstart', handleStart);
 
     audioElement.volume = a / 30;
+
+    audioElement.addEventListener('timeupdate', () => {
+        if (!isNaN(audioElement.duration)) {
+            const currentTime = audioElement.currentTime;
+            const duration = audioElement.duration;
+            seekSlider.value = (currentTime / duration) * 100;
+            currentTimeElement.textContent = formatTime(currentTime);
+        } else {
+            seekSlider.value = 0;
+        }
+    });
+    
+    function formatTime(seconds) {
+        const minutes = Math.floor(seconds / 60);
+        seconds = Math.floor(seconds % 60);
+        return `${minutes}:${seconds < 10 ? '0' : ''}${seconds}`;
+    }
+    
+    audioElement.addEventListener('volumechange', () => {
+        volumePercentage.textContent = `${Math.round(audioElement.volume * 100)}%`;
+    });
 
     audioElement.addEventListener('ended', () => {
         if (isTrackLooping) {
