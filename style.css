@@ -1,3 +1,4 @@
+/* Root Variables for Customization */
 :root {
     font-size: 16px;
     font-family: 'Open Sans', sans-serif;
@@ -9,8 +10,27 @@
     --grey-light: #ececec;
     --grey-dark: #b6b6b6;
     --grey-darker: #232323;
+    --control-bg: rgba(0, 0, 0, 0.7);
+    --highlight-color: #83a9ff;
+    --active-color: #ff9f1a;
+    --hover-color: #3f51b5;
+    --alt-bg-color: #2a2a2a;
+    --border-radius: 20px;
+    --box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
+    --track-art-size: 40vw; /* Use percentage for responsiveness */
+    --track-art-max-size: 150px; /* Max size for larger screens */
+    --track-art-radius: 50%;
+    --track-height: 70px; /* Track height customization */
 }
 
+/* Universal Reset */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+/* Body Styling */
 body {
     color: var(--text-primary);
     background-color: var(--bg-secondary);
@@ -19,6 +39,7 @@ body {
     overflow-x: hidden;
 }
 
+/* Scrollbar Styling */
 body::-webkit-scrollbar {
     width: 0.25rem;
 }
@@ -31,6 +52,7 @@ body::-webkit-scrollbar-thumb {
     background: #6649b8;
 }
 
+/* Main Content Styling */
 main {
     margin-left: 5rem;
     padding: 1rem;
@@ -42,12 +64,15 @@ main {
     position: relative;
 }
 
+/* Navbar Styling */
 .navbar {
     position: fixed;
     background-color: var(--bg-primary);
     overflow: hidden;
+    z-index: 1;
 }
 
+/* Navbar Navigation */
 .navbar-nav {
     list-style: none;
     padding: 0;
@@ -58,6 +83,7 @@ main {
     height: 100%;
 }
 
+/* Navbar Item */
 .nav-item {
     width: 100%;
 }
@@ -66,6 +92,7 @@ main {
     margin-top: auto;
 }
 
+/* Navbar Link */
 .nav-link {
     display: flex;
     align-items: center;
@@ -110,6 +137,7 @@ main {
     transition: var(--transition-speed);
 }
 
+/* Navbar Logo */
 .logo {
     font-weight: bold;
     text-transform: uppercase;
@@ -155,6 +183,7 @@ main {
     left: 15px;
 }
 
+/* Submenu Styling */
 .submenu {
     display: none;
     flex-direction: column;
@@ -172,7 +201,7 @@ main {
     background: #1e1e24;
 }
 
-.submenu::-webkit-scrollbar-thumb {
+sub-menu::-webkit-scrollbar-thumb {
     background: #6649b8;
 }
 
@@ -238,6 +267,7 @@ main {
     }
 }
 
+/* Theme Styling */
 .solar {
     --text-primary: #b6b6b6;
     --text-secondary: #ececec;
@@ -275,6 +305,7 @@ main {
     display: block;
 }
 
+/* Flexbox Container Styling */
 .flex-container {
     display: flex;
     justify-content: center;
@@ -293,6 +324,7 @@ main {
 }
 
 .plot {
+    padding: 10px;
     display: flex;
     justify-content: center;
     align-items: center;
@@ -381,4 +413,250 @@ button:hover {
 @keyframes spin {
     0% { transform: rotate(0deg); }
     100% { transform: rotate(360deg); }
+}
+
+/* Music Player Specific Styling */
+#musicPlayerBox {
+    width: 100%;
+    max-width: 300px;
+    max-height: 1200px;
+    background-color: var(--control-bg);
+    border-radius: var(--border-radius);
+    overflow: hidden;
+    box-shadow: var(--box-shadow);
+    display: flex;
+    flex-direction: column;
+    margin: 1px;
+}
+
+.player {
+    padding: 20px;
+}
+
+.details {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+}
+
+.track-art {
+    width: var(--track-art-size);
+    height: var(--track-art-size);
+    max-width: var(--track-art-max-size);
+    max-height: var(--track-art-max-size);
+    background-color: #333;
+    background-size: cover;
+    background-position: center;
+    border-radius: var(--track-art-radius);
+    margin-bottom: 15px;
+}
+
+.track-info {
+    flex: 1;
+}
+
+.track-name {
+    font-size: 1.2em;
+    color: var(--secondary-text);
+    margin-bottom: 5px;
+}
+
+.track-artist {
+    font-size: 1em;
+    color: var(--primary-text);
+}
+
+.player-controls {
+    margin-top: 15px;
+}
+
+.music-buttons {
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    margin-bottom: 15px;
+}
+
+.music-buttons div {
+    color: var (--primary-text);
+    cursor: pointer;
+    font-size: 1.5em;
+}
+
+.slider-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-bottom: 10px;
+}
+
+.seek-slider {
+    width: 80%;
+    height: 5px;
+    background: var(--highlight-color);
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+.info {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.8em;
+    color: #fff;
+}
+
+.separator {
+    width: 95%;
+    height: 2px;
+    background: linear-gradient(to right, transparent, #aaa, transparent);
+    margin: 10px auto;
+}
+
+.playlist {
+    padding: 20px;
+    flex: 1;
+    overflow-y: auto;
+}
+
+.track-list {
+    max-height: 200px; /* Ensure the tracklist has a scroll */
+    overflow-y: auto;
+}
+
+.track-list .track {
+    display: flex;
+    align-items: center;
+    padding: 10px 0;
+    cursor: pointer;
+    height: var(--track-height);
+    background-color: var(--control-bg);
+}
+
+.track-list .track:nth-child(even) {
+    background-color: var(--alt-bg-color);
+}
+
+.track-list .track.active {
+    background-color: var(--active-color);
+}
+
+.track-list .track:hover {
+    background-color: var(--hover-color);
+}
+
+.track-list .track img {
+    width: 40px;
+    height: 40px;
+    margin-right: 15px;
+}
+
+.track-list .track .track-info {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+
+.track-list .track .track-name {
+    font-size: 0.9em;
+    color: var(--primary-text);
+    margin-bottom: 5px;
+}
+
+.track-list .track .track-artist {
+    font-size: 0.8em;
+    color: var(--secondary-text);
+}
+
+.track-list::-webkit-scrollbar {
+    width: 8px;
+}
+
+.track-list::-webkit-scrollbar-thumb {
+    background: var(--highlight-color);
+    border-radius: 10px;
+}
+
+@media (max-width: 768px) {
+    .player-container {
+        max-width: 90vw;
+    }
+
+    .track-art {
+        width: 50%;
+        height: 50%;
+    }
+
+    .music-buttons div {
+        font-size: 1.2em;
+    }
+
+    .slider-container {
+        flex-direction: column;
+    }
+
+    .seek-slider {
+        width: 100%;
+    }
+
+    .volume-slider {
+        width: 50%;
+    }
+
+    .info {
+        flex-direction: column;
+    }
+}
+
+@media (max-width: 480px) {
+    .track-name, .track-artist {
+        font-size: 1em;
+    }
+
+    .music-buttons div {
+        font-size: 1em;
+    }
+
+    .slider-container {
+        flex-direction: column;
+    }
+
+    .seek-slider {
+        width: 100%;
+    }
+
+    .volume-slider {
+        width: 60%;
+    }
+
+    .info {
+        flex-direction: column;
+        align-items: center;
+    }
+}
+
+/* Add these styles for the effect button */
+#effectBtn {
+    position: absolute;
+    top: 10px;
+    left: 10px;
+    padding: 10px 15px;
+    background-color: #444;
+    color: white;
+    border: none;
+    cursor: pointer;
+    font-size: 1em;
+    border-radius: 5px;
+    transition: background-color 0.3s, transform 0.3s;
+    z-index: 10; /* Ensure the button is on top */
+}
+
+#effectBtn:hover {
+    background-color: #555;
+    transform: scale(1.05);
+}
+
+#effectBtn.active {
+    background-color: #ff9f1a;
 }

@@ -1,30 +1,37 @@
-document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener('DOMContentLoaded', () => {
     const plotElement = document.getElementById('plot');
     const audioElement = document.getElementById('audio');
-    const playPauseBtn = document.getElementById('playPauseBtn');
-    const loopBtn = document.getElementById('loopBtn');
+    const effectBtn = document.getElementById('effectBtn');
     const fileInput = document.getElementById('fileInput');
-    const graphDescriptionContainer = document.getElementById('graphDescriptionContainer');
     const graphDescriptionElement = document.getElementById('graphDescription');
-    const pageDescription = document.getElementById('pageDescription');
     const navbar = document.querySelector('.navbar');
     const graphSubmenu = document.getElementById('graphSubmenu');
+    const trackListElement = document.querySelector('.track-list');
     const logoLink = document.querySelector('.logo a');
+    const playPauseBtn = document.querySelector('.playpause-track');
+    const nextTrackBtn = document.querySelector('.next-track');
+    const prevTrackBtn = document.querySelector('.prev-track');
+    const shuffleBtn = document.querySelector('.random-track');
+    const repeatBtn = document.querySelector('.repeat-track');
+    const seekSlider = document.querySelector('.seek-slider');
+    const currentTimeElement = document.querySelector('.current-time');
+    const volumePercentage = document.querySelector('.volume-percentage');
+
     let selectedGraph = 'heart';
     let isMuted = false;
     let isPlaying = false;
-    let isLooping = true;
+    let isEffectLooping = false;
+    let isTrackLooping = false;
+    let isShuffling = false;
     let a = 10;
-    let musicFiles = [];
-    let loopInterval;
-    const loopSpeed = 100;
+    let effectLoopInterval;
+    const effectLoopSpeed = 100;
+    let currentTrackIndex = 0;
+    const defaultArtist = "Unknown Artist";
+    const defaultTrackArt = "path/to/default-art.png"; // Add your default track art path here
 
-    /* YouTube shenanigans */
-    let player;
-    let youtubeLinks = [];
-    let currentVideoIndex = 0;
+    const musicQueue = [];
 
-    /* Graph shenanigans */
     const graphConfigs = {
         heart: {
             script: 'graphs/heart.js',
@@ -40,39 +47,40 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     };
 
-    function loadGraphScript(scriptUrl, callback) {
+    function loadScript(scriptUrl, callback) {
         const script = document.createElement('script');
         script.src = scriptUrl;
         script.onload = callback;
         document.head.appendChild(script);
     }
 
-    function loadGraphDescription(descriptionUrl) {
-        fetch(descriptionUrl)
+    function fetchText(url, callback) {
+        fetch(url)
             .then(response => response.text())
-            .then(text => {
-                graphDescriptionElement.innerText = text;
-            });
+            .then(text => callback(text));
     }
 
     function plotCurrentGraph(angleModifier = 0) {
-        loadGraphScript(graphConfigs[selectedGraph].script, function() {
+        loadScript(graphConfigs[selectedGraph].script, () => {
             plotGraph(angleModifier, plotElement, isMuted, a);
         });
-        loadGraphDescription(graphConfigs[selectedGraph].description);
+        fetchText(graphConfigs[selectedGraph].description, text => {
+            graphDescriptionElement.innerText = text;
+        });
     }
 
     function selectGraph(graph) {
         selectedGraph = graph;
         plotCurrentGraph();
-        setSampleMusic();
+        addSampleMusicToQueue();
         closeSubmenus();
     }
 
-    function setSampleMusic() {
+    function addSampleMusicToQueue() {
         const graph = graphConfigs[selectedGraph];
         if (graph.sampleMusic) {
-            audioElement.src = graph.sampleMusic;
+            addTrackToQueue(graph.sampleMusic, selectedGraph, defaultArtist, defaultTrackArt);
+            loadTrack(0); // Load the first track but do not play
         }
     }
 
@@ -101,77 +109,150 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     function uploadMusic(event) {
-        musicFiles = Array.from(event.target.files);
-        if (musicFiles.length > 0) {
-            setMusicSource(0);
+        const files = Array.from(event.target.files);
+        files.forEach(file => {
+            const src = URL.createObjectURL(file);
+            const name = file.name.split('.').slice(0, -1).join('.');
+            addTrackToQueue(src, name, defaultArtist, defaultTrackArt);
+        });
+        if (files.length > 0 && !isPlaying) {
+            loadTrack(0);
         }
     }
 
-    function setMusicSource(index) {
-        if (index >= 0 && index < musicFiles.length) {
-            const file = musicFiles[index];
-            const reader = new FileReader();
-            reader.onload = function(e) {
-                audioElement.src = e.target.result;
-            };
-            reader.readAsDataURL(file);
-        }
+    function addTrackToQueue(src, name, artist, art) {
+        const track = {
+            src,
+            name,
+            artist,
+            art
+        };
+        musicQueue.push(track);
+        displayTrackList();
     }
 
-    function connectToSpotify() {
-        alert("Connect to Spotify feature coming soon!");
-    }
+    function displayTrackList() {
+        trackListElement.innerHTML = '';
+        musicQueue.forEach((track, index) => {
+            const trackDiv = document.createElement('div');
+            trackDiv.className = 'track';
+            if (index === currentTrackIndex) {
+                trackDiv.classList.add('active');
+            }
+            trackDiv.onclick = () => loadTrack(index);
 
-    function startLoop() {
-        let angle = 0;
-        clearInterval(loopInterval);
-        loopInterval = setInterval(() => {
-            angle += Math.PI / 100;
-            if (angle > Math.PI) angle = -Math.PI;
-            plotCurrentGraph(angle);
-        }, loopSpeed);
-    }
+            const trackInfo = document.createElement('div');
+            trackInfo.className = 'track-info';
+            trackInfo.innerHTML = `
+                <div class="track-name">${track.name}</div>
+                <div class="track-artist">${track.artist}</div>
+            `;
 
-    function stopLoop() {
-        clearInterval(loopInterval);
-        plotCurrentGraph();
-    }
+            const trackArt = document.createElement('img');
+            trackArt.src = track.art;
+            trackArt.alt = track.name;
+            trackArt.className = 'track-art';
 
-    function toggleLoop() {
-        isLooping = !isLooping;
-        if (isLooping) {
-            loopBtn.classList.add('active');
-            startLoop();
-        } else {
-            loopBtn.classList.remove('active');
-            stopLoop();
-        }
-    }
-
-    function closeSubmenus() {
-        const submenus = document.querySelectorAll('.submenu');
-        submenus.forEach(submenu => {
-            submenu.style.display = 'none';
+            trackDiv.appendChild(trackArt);
+            trackDiv.appendChild(trackInfo);
+            trackListElement.appendChild(trackDiv);
         });
     }
 
-    plotElement.addEventListener('click', toggleMute);
-    loopBtn.addEventListener('click', toggleLoop);
+    function loadTrack(index) {
+        if (index >= 0 && index < musicQueue.length) {
+            currentTrackIndex = index;
+            const track = musicQueue[index];
+            audioElement.src = track.src;
+            document.querySelector('.track-name').textContent = track.name;
+            document.querySelector('.track-artist').textContent = track.artist;
+            document.querySelector('.track-art').style.backgroundImage = `url(${track.art})`;
+            isPlaying = false;
+            updatePlayPauseButton();
+        }
+    }
 
-    playPauseBtn.addEventListener('click', function() {
+    function startEffectLoop() {
+        let angle = 0;
+        clearInterval(effectLoopInterval);
+        effectLoopInterval = setInterval(() => {
+            angle += Math.PI / 100;
+            if (angle > Math.PI) angle = -Math.PI;
+            plotCurrentGraph(angle);
+        }, effectLoopSpeed);
+    }
+
+    function stopEffectLoop() {
+        clearInterval(effectLoopInterval);
+        plotCurrentGraph();
+    }
+
+    function toggleEffectLoop() {
+        isEffectLooping = !isEffectLooping;
+        if (isEffectLooping) {
+            effectBtn.classList.add('active');
+            startEffectLoop();
+        } else {
+            effectBtn.classList.remove('active');
+            stopEffectLoop();
+        }
+    }
+
+    function playpauseTrack() {
         isPlaying = !isPlaying;
         if (isPlaying) {
             audioElement.play();
-            playPauseBtn.textContent = 'Pause';
-            if (isLooping) {
-                startLoop();
+            if (!isEffectLooping) {
+                startEffectLoop();
+                isEffectLooping = true;
             }
         } else {
             audioElement.pause();
-            playPauseBtn.textContent = 'Play';
-            stopLoop();
+            stopEffectLoop();
+            isEffectLooping = false;
         }
-    });
+        updatePlayPauseButton();
+    }
+
+    function updatePlayPauseButton() {
+        const playPauseIcon = document.querySelector('.playpause-track i');
+        if (isPlaying) {
+            playPauseIcon.classList.replace('fa-play-circle', 'fa-pause-circle');
+        } else {
+            playPauseIcon.classList.replace('fa-pause-circle', 'fa-play-circle');
+        }
+    }
+
+    function prevTrack() {
+        currentTrackIndex = (currentTrackIndex > 0) ? currentTrackIndex - 1 : musicQueue.length - 1;
+        loadTrack(currentTrackIndex);
+        if (isPlaying) {
+            audioElement.play();
+        }
+    }
+
+    function nextTrack() {
+        currentTrackIndex = (currentTrackIndex < musicQueue.length - 1) ? currentTrackIndex + 1 : 0;
+        loadTrack(currentTrackIndex);
+        if (isPlaying) {
+            audioElement.play();
+        }
+    }
+
+    function toggleShuffle() {
+        isShuffling = !isShuffling;
+        shuffleBtn.classList.toggle('active', isShuffling);
+    }
+
+    function toggleTrackLoop() {
+        isTrackLooping = !isTrackLooping;
+        repeatBtn.classList.toggle('active', isTrackLooping);
+    }
+
+    function seekTo() {
+        const seekTo = audioElement.duration * (seekSlider.value / 100);
+        audioElement.currentTime = seekTo;
+    }
 
     function handleStart(event) {
         const initialA = a;
@@ -209,8 +290,16 @@ document.addEventListener('DOMContentLoaded', function() {
     plotElement.addEventListener('mousedown', handleStart);
     plotElement.addEventListener('touchstart', handleStart);
 
-    audioElement.muted = false;
     audioElement.volume = a / 30;
+
+    audioElement.addEventListener('ended', () => {
+        if (isTrackLooping) {
+            audioElement.currentTime = 0;
+            audioElement.play();
+        } else {
+            nextTrack();
+        }
+    });
 
     for (const [graphName, config] of Object.entries(graphConfigs)) {
         const thumbnailDiv = document.createElement('div');
@@ -233,9 +322,9 @@ document.addEventListener('DOMContentLoaded', function() {
     fileInput.addEventListener('change', uploadMusic);
 
     plotCurrentGraph();
-    setSampleMusic();
+    addSampleMusicToQueue();
 
-    logoLink.addEventListener('click', function() {
+    logoLink.addEventListener('click', () => {
         if (navbar.classList.contains('active')) {
             navbar.classList.remove('active');
             closeSubmenus();
@@ -244,7 +333,7 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
 
-    document.addEventListener('click', function(event) {
+    document.addEventListener('click', (event) => {
         const isClickInside = navbar.contains(event.target) || logoLink.contains(event.target);
         if (!isClickInside) {
             navbar.classList.remove('active');
@@ -253,12 +342,12 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 
     document.querySelectorAll('.nav-link').forEach(item => {
-        item.addEventListener('click', function() {
+        item.addEventListener('click', () => {
             navbar.classList.add('active');
         });
     });
 
-    window.addEventListener('resize', function() {
+    window.addEventListener('resize', () => {
         const plotContainerRect = document.getElementById('plotContainer').getBoundingClientRect();
         const controlOverlay = document.getElementById('controlOverlay');
         controlOverlay.style.top = `${plotContainerRect.bottom}px`;
@@ -266,11 +355,18 @@ document.addEventListener('DOMContentLoaded', function() {
 
     window.dispatchEvent(new Event('resize'));
 
-    document.getElementById('youtubeLinkInput').addEventListener('keypress', function(event) {
+    document.getElementById('youtubeLinkInput').addEventListener('keypress', (event) => {
         if (event.key === 'Enter') {
             addYouTubeLink();
         }
     });
+
+    playPauseBtn.addEventListener('click', playpauseTrack);
+    nextTrackBtn.addEventListener('click', nextTrack);
+    prevTrackBtn.addEventListener('click', prevTrack);
+    shuffleBtn.addEventListener('click', toggleShuffle);
+    repeatBtn.addEventListener('click', toggleTrackLoop);
+    seekSlider.addEventListener('input', seekTo);
 });
 
 function toggleSubmenu(id) {
@@ -365,12 +461,12 @@ function addToPlaylist(videoId) {
         });
 }
 
-window.playVideo = function(videoId) {
+window.playVideo = function (videoId) {
     player.loadVideoById(videoId);
     updatePlaylistStatus(videoId, 'Playing');
 };
 
-window.removeFromPlaylist = function(videoId) {
+window.removeFromPlaylist = function (videoId) {
     youtubeLinks = youtubeLinks.filter(id => id !== videoId);
     document.getElementById(`item-${videoId}`).remove();
 };
